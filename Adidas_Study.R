@@ -115,23 +115,26 @@ Adidas2021 <- adidas_df %>%
 #looking at the summary we can see that the bulk of the original data is in 2021 so I believe it will be ok to make predictions based on 
 # 2021 only. Where we can have better data to work with.  
 summary(Adidas2021)
-#Finding linearity of variables using Total_sales our dependent VAriable (y)
+#Finding linearity of variables using Total_sales our dependent VAriable (y) This can give us an Idea of what would be a good predictor.
 ggplot(Adidas2021, aes(x = Price_Per_Unit, y = Total_Sales))+ geom_point() 
 ggplot(Adidas2021, aes(x = Units_Sold, y = Total_Sales))+ geom_point()
 ggplot(Adidas2021, aes(x = Operating_Profit, y = Total_Sales))+ geom_point()
 ggplot(Adidas2021, aes(x = Operating_Margin, y = Total_Sales))+ geom_point()
-
-AdidasModel1 <- lm(Total_Sales ~ Units_Sold + Operating_Profit + Operating_Margin + Region, data = Adidas2021)
+#### Building Predictive models using lm
+# Using Total sales as dependent, and Units sold, operating profit, operating margin, city and state as independent variables
+AdidasModel1 <- lm(Total_Sales ~ Units_Sold + Price_Per_Unit, data = Adidas2021)
 summary(AdidasModel1)
-PredictedSales <- data.frame(Sales_Prediction = predict(AdidasModel1, Adidas2021), 
+PredictedSales1 <- data.frame(Sales_Prediction = predict(AdidasModel1, Adidas2021), 
                              actualTotal_sales = Adidas2021$Total_Sales,
                              difference = PredictedSales$Sales_Prediction - PredictedSales$actualTotal_sales
-                             )
-head(PredictedSales)
+)
+head(PredictedSales1)
 #plotting predicted sales v actual sales from 2021 to see our model is fairly close to what we had. 
-ggplot(PredictedSales, aes(x = Sales_Prediction, y = actualTotal_sales, color = difference)) + 
+AdidasModel1_plot <- ggplot(PredictedSales2, aes(x = Sales_Prediction, y = actualTotal_sales, color = difference)) + 
   geom_point() + 
   geom_abline() + 
   ggtitle("Actual v Predicted Sales")+
   xlab("Actual Sales 2021") +
   ylab("Predicted Sales")
+AdidasModel1_plot
+
