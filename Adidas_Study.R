@@ -98,39 +98,40 @@ ggplot(adidas_df, aes(x = Invoice_Date, y = Total_Sales, color = Total_Sales)) +
   geom_jitter() + 
   theme(axis.text.x = element_text(size = 6.7, angle = 90)) +
   ylab("Total Sales")
-ggplot(adidas_df, aes(x = Invoice_Date, y = Operating_Profit, color = Total_Sales)) +
-  geom_jitter() + 
-  theme(axis.text.x = element_text(size = 6.7, angle = 90)) +
-  ylab("Operating Profit")
+
 ###########################################################################################################
 ## When we look at the two invoice date graphs there is significant
 ## jump of number of sales between 2020 and 2021. I believe there was a event outside of the control of many of us
 ## that affected these sales. (COVID)
-## in addition, working in sales you know sales can be very different based on the time of the year.
-## In retail clothing obviously sales become stronger towards the end of the year for the holidays
-## To try and predict sales based on this data set I believe we need to subset
-## based on quarters. 
+
 Adidas2021 <- adidas_df %>% 
   filter(Invoice_Date >= as.Date("2021-01-01") & Invoice_Date <= as.Date("2021-12-31"))
 #looking at the summary we can see that the bulk of the original data is in 2021 so I believe it will be ok to make predictions based on 
 # 2021 only. Where we can have better data to work with.  
 summary(Adidas2021)
-#Finding linearity of variables using Total_sales our dependent VAriable (y) This can give us an Idea of what would be a good predictor.
-ggplot(Adidas2021, aes(x = Price_Per_Unit, y = Total_Sales))+ geom_point() 
-ggplot(Adidas2021, aes(x = Units_Sold, y = Total_Sales))+ geom_point()
-ggplot(Adidas2021, aes(x = Operating_Profit, y = Total_Sales))+ geom_point()
-ggplot(Adidas2021, aes(x = Operating_Margin, y = Total_Sales))+ geom_point()
+#Finding linearity of variables using Total_sales our dependent Variable (y) This can give us an Idea of what would be a good predictor.
+ggplot(Adidas2021, aes(x = Price_Per_Unit, y = Total_Sales))+ geom_point() # This on has a good positive slope 
+ggplot(Adidas2021, aes(x = Units_Sold, y = Total_Sales))+ geom_point() # This one has a positive slope 
+ggplot(Adidas2021, aes(x = Operating_Profit, y = Total_Sales))+ geom_point() # This one has a positive slope 
+ggplot(Adidas2021, aes(x = Operating_Margin, y = Total_Sales))+ geom_point() # This one doesn't have the same slope we are looking for
+ggplot(Adidas2021, aes(x = Retailer, y = Total_Sales))+ geom_point()  #This one doesn't have the same slope we are looking for
+ggplot(Adidas2021, aes(x = Invoice_Date, y = Total_Sales))+ geom_point() #This one doesn't have the same slope we are looking for
+ggplot(Adidas2021, aes(x = State, y = Total_Sales))+ geom_point() #This one doesn't have the same slope we are looking for
+ggplot(Adidas2021, aes(x = City, y = Total_Sales))+ geom_point() #This one doesn't have the same slope we are looking for
+ggplot(Adidas2021, aes(x = Region, y = Total_Sales))+ geom_point() #This one doesn't have the same slope we are looking for
+ggplot(Adidas2021, aes(x = Product, y = Total_Sales))+ geom_point() #This one doesn't have the same slope we are looking for
+# The reason we don't want to use the 0 slope is we don't want to overfit the model.
 #### Building Predictive models using lm
 # Using Total sales as dependent, and Units sold, operating profit, operating margin, city and state as independent variables
-AdidasModel1 <- lm(Total_Sales ~ Units_Sold + Price_Per_Unit, data = Adidas2021)
+AdidasModel1 <- lm(Total_Sales ~ Units_Sold + Price_Per_Unit + Operating_Profit, data = Adidas2021)
 summary(AdidasModel1)
-PredictedSales1 <- data.frame(Sales_Prediction = predict(AdidasModel1, Adidas2021), 
-                             actualTotal_sales = Adidas2021$Total_Sales,
-                             difference = PredictedSales$Sales_Prediction - PredictedSales$actualTotal_sales
-)
-head(PredictedSales1)
+Predicted = predict(AdidasModel1,Adidas2021)
+Sales = Adidas2021$Total_Sales
+Difference = (Predicted - Sales)
+PredictedSales <- data.frame(Predicted,Sales,Difference)
+head(PredictedSales)
 #plotting predicted sales v actual sales from 2021 to see our model is fairly close to what we had. 
-AdidasModel1_plot <- ggplot(PredictedSales2, aes(x = Sales_Prediction, y = actualTotal_sales, color = difference)) + 
+AdidasModel1_plot <- ggplot(PredictedSales, aes(x = Predicted, y = Sales, color = Difference)) + 
   geom_point() + 
   geom_abline() + 
   ggtitle("Actual v Predicted Sales")+
